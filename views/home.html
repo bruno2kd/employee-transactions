@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ADP Innovation Labs Pre-Interview Assignment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    .button-info {
+      text-align: center;
+      color: #555;
+      margin-top: 20px;
+    }
+
+    .loading {
+      display: none;
+      margin: 60px 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      position: relative;
+      animation: rotate 2s linear infinite;
+    }
+
+    .spinner .dot {
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #3498db;
+      border-radius: 50%;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    .spinner .dot:nth-child(1) {
+      animation-delay: -1.5s;
+    }
+
+    .spinner .dot:nth-child(2) {
+      animation-delay: -1s;
+    }
+
+    .spinner .dot:nth-child(3) {
+      animation-delay: -0.5s;
+    }
+
+    @keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(-15px);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    #adpResultsBtn {
+      text-align: center;
+      font-size: 24px;
+      margin-top: 20px;
+      color: #3498db;
+    }
+
+
+    #employeeResult {
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .message {
+      margin-bottom: 20px;
+    }
+
+    .employee-info {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .employee-info p {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>ADP Innovation Labs Pre-Interview Assignment</h1>
+
+  <div class="container">
+    <p class="button-info">Click the button to check the employee's results.</p>
+
+    <div style="display: flex; justify-content: center;">
+      <button id="adpResultsBtn">Get Employee Results</button>
+    </div>
+
+    <div id="employeeResult">
+      <div class="employee-info">
+        <h2>Employee Details</h2>
+        <p><strong>Response message:</strong> <span id="responseMessage"></span></p>
+        <p><strong>Name:</strong> <span id="employeeName"></span></p>
+        <p><strong>Category:</strong> <span id="employeeCategory"></span></p>
+        <p><strong>ID:</strong> <span id="employeeId"></span></p>
+        <p><strong>Amount:</strong> <span id="employeeAmount"></span></p>
+      </div>
+      </p>
+    </div>
+    <div class="loading" id="loading">
+      <div class="spinner">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+
+
+    <script type="text/javascript">
+      class HomeHandler {
+        constructor() {
+          this.resultDiv = document.getElementById('employeeResult');
+          this.loadingDiv = document.getElementById('loading');
+          this.requestButton = document.getElementById('adpResultsBtn');
+          this.responseMessage = document.getElementById("responseMessage");
+          this.employeeName = document.getElementById("employeeName");
+          this.employeeCategory = document.getElementById("employeeCategory");
+          this.employeeId = document.getElementById("employeeId");
+          this.employeeAmount = document.getElementById("employeeAmount");
+          this.topEarner = null
+
+          this.requestButton.addEventListener('click', () => this.makeRequest());
+        }
+
+        async makeRequest() {
+          this.resultDiv.style.display = 'none';
+          this.loadingDiv.style.display = 'flex';
+
+          try {
+            const response = await fetch('/api/adp-test');
+            const data = await response.json();
+            this.topEarner = data
+
+            this.resultDiv.style.display = 'flex';
+            this.responseMessage.textContent = data.message;
+            this.employeeName.textContent = data.topEarner.employee.name;
+            this.employeeCategory.textContent = data.topEarner.employee.categoryCode;
+            this.employeeId.textContent = data.topEarner.employee.id;
+            const formatedAmound = this.formatAsDollars(data.topEarner.amount)
+            this.employeeAmount.textContent = formatedAmound;
+          } catch (error) {
+            this.resultDiv.textContent = 'Error: Failed to fetch data.';
+            console.error('Error:', error);
+          }
+          this.loadingDiv.style.display = 'none';
+        }
+
+        formatAsDollars = (value) => {
+          const dollars = Math.floor(value / 100);
+          const cents = value % 100;
+          return `$${dollars.toLocaleString('en-US')}.${cents.toString().padStart(2, '0')}`;
+        };
+      }
+
+      new HomeHandler();
+    </script>
+</body>
+
+
+</html>
