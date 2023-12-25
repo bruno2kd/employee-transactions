@@ -1,7 +1,7 @@
 const { isDateFromLastYear } = require("../utils")
 
 const ADP_BASE_URL = "https://interview.adpeai.com/api/v2"
-const responseMap = {
+const RESPONSE_MAP = {
     200: "Success",
     400: "Incorrect value in result; no ID specified; value is invalid",
     404: "Value not found for specified ID",
@@ -33,8 +33,10 @@ class AdpTestController {
             }
 
             const employeeMaping = transactions.reduce((acc, tr) => {
+                // checks if is type alpha
                 if (tr.type !== "alpha") return acc
                 const { timeStamp } = tr
+                // check if it is last year
                 const isLastYear = isDateFromLastYear(timeStamp)
                 if (!isLastYear) return acc
 
@@ -45,6 +47,7 @@ class AdpTestController {
                 let employee = employeesAcc[employeeId]
 
 
+                // if new employee add to the map, if it already there, add amount to total
                 if (employee) {
                     const newAmount = employee.amount + transactionAmount
                     employee.result.push(tr.transactionID)
@@ -91,7 +94,7 @@ class AdpTestController {
             return {
                 success: statusCode === 200,
                 statusCode: statusCode,
-                message: responseMap[statusCode],
+                message: RESPONSE_MAP[statusCode],
                 topEarner: {
                     employee: employeeMaping.topEarner.employee,
                     amount: employeeMaping.topEarner.amount
