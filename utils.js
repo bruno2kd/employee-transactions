@@ -4,11 +4,11 @@
  * @returns {boolean} Returns true if the provided date is from the last year; otherwise, returns false.
  */
 const isDateFromLastYear = (date) => {
-    const checkingDate = new Date(date);
-    const currentDate = new Date();
+  const checkingDate = new Date(date)
+  const currentDate = new Date()
 
-    const isLastYear = checkingDate.getFullYear() === currentDate.getFullYear() - 1;
-    return isLastYear
+  const isLastYear = checkingDate.getFullYear() === currentDate.getFullYear() - 1
+  return isLastYear
 }
 
 /**
@@ -17,19 +17,19 @@ const isDateFromLastYear = (date) => {
  * @returns {Object} An object with 'requestedPath' (URL path) and 'params' (params as key-value pairs).
  */
 const separatePathAndParams = urlString => {
-    const [requestedPath, queryParams] = urlString.split('?');
-    const params = {};
-    if (queryParams) {
-        const queryParamsArray = queryParams.split('&');
-        queryParamsArray.forEach(param => {
-            const [key, value] = param.split('=');
-            params[key] = value;
-        });
-    }
-    return { requestedPath, params };
-};
+  const [requestedPath, queryParams] = urlString.split('?')
+  const params = {}
+  if (queryParams) {
+    const queryParamsArray = queryParams.split('&')
+    queryParamsArray.forEach(param => {
+      const [key, value] = param.split('=')
+      params[key] = value
+    })
+  }
+  return { requestedPath, params }
+}
 
 module.exports = {
-    isDateFromLastYear,
-    separatePathAndParams
+  isDateFromLastYear,
+  separatePathAndParams
 }
