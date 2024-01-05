@@ -188,7 +188,8 @@
           this.loadingDiv.style.display = 'flex';
 
           try {
-            const response = await fetch('/api/adp-test');
+            const params = new URLSearchParams({type: 'alpha'});
+            const response = await fetch(`/api/adp-test?${params}`);
             const data = await response.json();
             this.topEarner = data
 

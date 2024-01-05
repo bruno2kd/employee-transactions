@@ -1,29 +1,38 @@
 const { isDateFromLastYear } = require("../utils")
 
-const ADP_BASE_URL = "https://interview.adpeai.com/api/v2"
-const RESPONSE_MAP = {
-    200: "Success",
-    400: "Incorrect value in result; no ID specified; value is invalid",
-    404: "Value not found for specified ID",
-    503: "Error communicating with database",
-}
-
 class AdpTestController {
     constructor() {
         this.index = this.index.bind(this);
         this.performCalculation = this.performCalculation.bind(this);
-    }
-    
-    async index(req, res) {
-        const response = await this.performCalculation()
-        res.setHeader("Content-Type", "application/json")
-        res.statusCode = response.statusCode
-        res.end(JSON.stringify(response))
+        this.adpBaseUrl = "https://interview.adpeai.com/api/v2"
+        this.defaultTransactionType = 'alpha'
+        this.responseMap = {
+            200: "Success",
+            400: "Incorrect value in result; no ID specified; value is invalid",
+            404: "Value not found for specified ID",
+            503: "Error communicating with database",
+        }
     }
 
-    async performCalculation() {
+    async index(req, res) {
         try {
-            const transactionRes = await fetch(`${ADP_BASE_URL}/get-task`)
+            const transactionType = req?.params?.type
+            const response = await this.performCalculation(transactionType)
+            res.setHeader("Content-Type", "application/json")
+            res.statusCode = response.statusCode
+            res.end(JSON.stringify(response))    
+        } catch (error) {
+            console.log(error);
+            res.status(400).end(JSON.stringify({
+                message: "Something went wrong! =\ "
+            }))
+        }
+        
+    }
+
+    async performCalculation(transactionType = this.defaultTransactionType) {
+        try {
+            const transactionRes = await fetch(`${this.adpBaseUrl}/get-task`)
             const transactionsData = await transactionRes.json()
             const transactions = transactionsData?.transactions
 
@@ -33,8 +42,6 @@ class AdpTestController {
             }
 
             const employeeMaping = transactions.reduce((acc, tr) => {
-                // checks if is type alpha
-                if (tr.type !== "alpha") return acc
                 const { timeStamp } = tr
                 // check if it is last year
                 const isLastYear = isDateFromLastYear(timeStamp)
@@ -50,13 +57,22 @@ class AdpTestController {
                 // if new employee add to the map, if it already there, add amount to total
                 if (employee) {
                     const newAmount = employee.amount + transactionAmount
-                    employee.result.push(tr.transactionID)
+                    if (tr.type === transactionType) {
+                        employee.result.push(tr.transactionID)
+                    }
                     employee.amount = newAmount
                     employeesAcc[employeeId] = employee
                 } else {
-                    employee = {
-                        amount: transactionAmount,
-                        result: [tr.transactionID]
+                    if (tr.type === transactionType) {
+                        employee = {
+                            amount: transactionAmount,
+                            result: [tr.transactionID]
+                        }
+                    } else {
+                        employee = {
+                            amount: transactionAmount,
+                            result: []
+                        }
                     }
                     employeesAcc[employeeId] = employee
                 }
@@ -76,7 +92,6 @@ class AdpTestController {
                 return acc
             }, initialValue)
 
-
             employeeMaping.topEarner.result
             const postData = {
                 id: transactionsData.id,
@@ -89,17 +104,17 @@ class AdpTestController {
                 },
                 body: JSON.stringify(postData)
             };
-            const submitRes = await fetch(`${ADP_BASE_URL}/submit-task`, requestOptions)
+            const submitRes = await fetch(`${this.adpBaseUrl}/submit-task`, requestOptions)
             const statusCode = submitRes.status
             return {
                 success: statusCode === 200,
                 statusCode: statusCode,
-                message: RESPONSE_MAP[statusCode],
+                message: this.responseMap[statusCode],
                 topEarner: {
                     employee: employeeMaping.topEarner.employee,
                     amount: employeeMaping.topEarner.amount
                 }
-            }            
+            }
         } catch (error) {
             return {
                 statusCode: 400,

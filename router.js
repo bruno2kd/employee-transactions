@@ -1,3 +1,4 @@
+const { separatePathAndParams } = require("./utils")
 const AdpTestController = require("./controller/AdpTestController")
 const HtmlController = require("./controller/HtmlController")
 const adpTestController = new AdpTestController
@@ -17,7 +18,9 @@ const routes = {
 
 const router = async function (req, res) {
     try {
-        const requestedPath = req.url
+        const requestUrl = req.url
+        const {requestedPath, params} = separatePathAndParams(requestUrl)
+        req.params = params
         const requestMethod = req.method
         const routesPath = routes[requestedPath];
         const handler = routesPath && routesPath[requestMethod] || routes['notFound'];

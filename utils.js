@@ -11,6 +11,25 @@ const isDateFromLastYear = (date) => {
     return isLastYear
 }
 
+/**
+ * Separates the path and parameters from a URL string.
+ * @param {string} urlString - The URL string with parameters.
+ * @returns {Object} An object with 'requestedPath' (URL path) and 'params' (params as key-value pairs).
+ */
+const separatePathAndParams = urlString => {
+    const [requestedPath, queryParams] = urlString.split('?');
+    const params = {};
+    if (queryParams) {
+        const queryParamsArray = queryParams.split('&');
+        queryParamsArray.forEach(param => {
+            const [key, value] = param.split('=');
+            params[key] = value;
+        });
+    }
+    return { requestedPath, params };
+};
+
 module.exports = {
-    isDateFromLastYear   
+    isDateFromLastYear,
+    separatePathAndParams
 }
