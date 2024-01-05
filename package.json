@@ -8,15 +8,16 @@
   },
   "scripts": {
     "start": "node index.js",
-    "serve": "node server.js",
+    "serve": "node check-version && node server.js",
     "dev": "nodemon server.js"
   },
   "author": "Bruno Kern",
   "license": "ISC",
   "engines": {
-    "node": ">=20.10.0"
+    "node": ">=20"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "semver": "^7.5.4"
   }
 }
